@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "web-project-template"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+taskiq = {extras = ["reload"], version = "^0.8.8"}
+taskiq-redis = "^0.4.0"
+taskiq-aio-pika = "^0.4.0"
+taskiq-pipelines = "^0.1.1"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.20"}
+asyncio = "^3.4.3"
+psycopg2-binary = "^2.9.7"
+asyncpg = "^0.28.0"
+httpx = "^0.25.0"
+tldextract = "^3.5.0"
+taskiq-dependencies = "^1.4.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.2"
+pytest-env = "^1.0.1"
+respx = "^0.20.2"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+
+[tool.usort]
+
+[tool.usort.known]
+first_party=["src", "config", "tests"]
+
+
+[tool.pytest.ini_options]
+env = [
+    "ENVIRONMENT=pytest",
+]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
