@@ -49,7 +49,7 @@ class ClientSettings:
 DEFAULT_RATE_LIMIT = ClientSettings(None, None)
 
 
-class PoliteClient(AsyncClient):
+class RateLimitedClient(AsyncClient):
     def __init__(
         self,
         clientSettings: ClientSettings = DEFAULT_RATE_LIMIT,

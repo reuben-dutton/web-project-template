@@ -9,7 +9,7 @@ from taskiq_pipelines import PipelineMiddleware
 from taskiq_redis import RedisAsyncResultBackend
 
 import config
-from src.web.client import ClientSettings, PoliteClient
+from src.web.client import ClientSettings, RateLimitedClient
 
 
 logging.basicConfig(
@@ -44,7 +44,7 @@ async def startup(state: TaskiqState) -> None:
     # maximum retry per request
     clientSettings.max_retries = config.MAX_RETRIES_PER_REQUEST
     # create httpx.AsyncClient with rate limits
-    state.client = PoliteClient(clientSettings)
+    state.client = RateLimitedClient(clientSettings)
     logger.info("HTTP client opened (%s).", type(state.client))
     logger.info("Rate limits: %s", clientSettings)
 

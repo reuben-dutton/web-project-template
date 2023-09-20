@@ -1,6 +1,6 @@
 import pytest
 
-from src.web.client import PoliteClient, ClientSettings
+from src.web.client import RateLimitedClient, ClientSettings
 
 
 @pytest.fixture
@@ -11,7 +11,7 @@ def anyio_backend():
 @pytest.fixture
 async def unlimited_client():
     clientSettings: ClientSettings = ClientSettings(None, None)
-    client = PoliteClient(clientSettings)
+    client = RateLimitedClient(clientSettings)
     yield client
     await client.aclose()
 
@@ -20,7 +20,7 @@ async def unlimited_client():
 async def retry_client():
     clientSettings: ClientSettings = ClientSettings(None, None)
     clientSettings.set_max_retries(2)
-    client = PoliteClient(clientSettings)
+    client = RateLimitedClient(clientSettings)
     yield client
     await client.aclose()
 
@@ -28,7 +28,7 @@ async def retry_client():
 @pytest.fixture(params=[17, 23, 31], ids=lambda rate: f"global_rate={rate}")
 async def global_limited_client(request):
     clientSettings: ClientSettings = ClientSettings(request.param, None)
-    client = PoliteClient(clientSettings)
+    client = RateLimitedClient(clientSettings)
     yield client
     await client.aclose()
 
@@ -37,6 +37,6 @@ async def global_limited_client(request):
 async def domain_limited_client(request):
     clientSettings: ClientSettings = ClientSettings(None, request.param)
     clientSettings.set_domain_concurrency(1)
-    client = PoliteClient(clientSettings)
+    client = RateLimitedClient(clientSettings)
     yield client
     await client.aclose()
