@@ -3,5 +3,6 @@
 **/.vscode
 
 .python-version
+.coverage
 
 logs

@@ -23,6 +23,9 @@ taskiq-dependencies = "^1.4.0"
 pytest = "^7.4.2"
 pytest-env = "^1.0.1"
 respx = "^0.20.2"
+pytest-cov = "^4.1.0"
+pytest-randomly = "^3.15.0"
+pytest-dependency = "^0.5.1"
 
 [tool.black]
 line-length = 88
@@ -39,6 +42,17 @@ first_party=["src", "config", "tests"]
 env = [
     "ENVIRONMENT=pytest",
 ]
+
+[tool.coverage.run]
+omit = [
+    # omit tests
+    "tests/*",
+    # omit config
+    "config.py",
+    "conftest.py",
+]
+
+[tool.coverage.report]
 
 
 [build-system]
