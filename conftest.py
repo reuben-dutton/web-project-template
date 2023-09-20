@@ -25,7 +25,7 @@ async def retry_client():
     await client.aclose()
 
 
-@pytest.fixture(params=[1, 2, 3, 5, 7], ids=lambda rate: f"global_rate={rate}")
+@pytest.fixture(params=[17, 23, 31], ids=lambda rate: f"global_rate={rate}")
 async def global_limited_client(request):
     clientSettings: ClientSettings = ClientSettings(request.param, None)
     client = PoliteClient(clientSettings)
@@ -33,7 +33,7 @@ async def global_limited_client(request):
     await client.aclose()
 
 
-@pytest.fixture(params=[1, 2, 3], ids=lambda rate: f"domain_rate={rate}")
+@pytest.fixture(params=[7, 11, 17], ids=lambda rate: f"domain_rate={rate}")
 async def domain_limited_client(request):
     clientSettings: ClientSettings = ClientSettings(None, request.param)
     clientSettings.set_domain_concurrency(1)

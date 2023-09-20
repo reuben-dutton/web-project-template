@@ -90,7 +90,7 @@ async def test_global_limits_adhered(global_limited_client):
 
     startTime = timeit.default_timer()
 
-    num_requests = 7
+    num_requests = 47
 
     async with asyncio.TaskGroup() as tg:
         for _ in range(num_requests):
@@ -126,15 +126,16 @@ async def test_domain_limits_adhered(domain_limited_client):
 
     startTime = timeit.default_timer()
 
-    base_num_requests_per_domain = 3
+    base_num_requests_per_domain = 13
 
     async with asyncio.TaskGroup() as tg:
         for i, example_url in enumerate(example_urls):
-            num_requests = base_num_requests_per_domain + i * 2
+            num_requests = base_num_requests_per_domain + i * 11
             for _ in range(num_requests):
                 tg.create_task(domain_limited_client.get(example_url))
 
-    max_requests_to_domain = base_num_requests_per_domain + (len(example_urls) - 1) * 2
+    # should be limited by the maximum requests to a single domain
+    max_requests_to_domain = base_num_requests_per_domain + (len(example_urls) - 1) * 11
 
     for response in responses:
         assert response.status_code == 200
@@ -146,6 +147,5 @@ async def test_domain_limits_adhered(domain_limited_client):
 
     time_elapsed = timeit.default_timer() - startTime
 
-    # 4 requests with 1 per domain per second = 1 seconds minimum
     assert time_elapsed >= time_needed
     assert time_elapsed < time_needed + 1
