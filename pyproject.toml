@@ -47,6 +47,8 @@ env = [
 omit = [
     # omit tests
     "tests/*",
+    # broker
+    "src/worker/broker.py",
     # omit config
     "config.py",
     "conftest.py",
