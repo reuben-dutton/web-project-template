@@ -10,6 +10,7 @@ from taskiq_redis import RedisAsyncResultBackend
 
 import config
 from src.web.client import ClientSettings, RateLimitedClient
+from src.database.models import Base
 
 
 logging.basicConfig(
@@ -52,6 +53,9 @@ async def startup(state: TaskiqState) -> None:
         return
 
     engine = sqlalchemy.create_engine(config.DATABASE_CONNECT_STRING)
+
+    Base.metadata.create_all(engine)
+
     logger.info(
         "Database engine created, connected to %s",
         config.DATABASE_CONNECT_STRING,
