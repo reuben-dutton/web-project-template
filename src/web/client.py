@@ -1,11 +1,15 @@
 import asyncio
+import hashlib
 import logging
+import os
 from dataclasses import dataclass
 from functools import wraps
+from json.decoder import JSONDecodeError
 from typing import Optional
 
+import simplejson as json
 import tldextract
-from httpx import AsyncClient
+from httpx import AsyncClient, Request, Response
 
 
 logger = logging.getLogger(__name__)
@@ -174,5 +178,65 @@ class RateLimitedClient(AsyncClient):
 
         # schedule the release of the domain and pool locks
         self._schedule_lock_release(domain, total_elapsed)
+
+        return response
+
+
+class CachingClient(RateLimitedClient):
+    def __init__(self, cache_location, *args, **kwargs):
+        self.cache_location = os.path.join(os.getcwd(), cache_location)
+        self.caching = self.cache_location is not None
+        super().__init__(*args, **kwargs)
+
+    def get_filepath(self, request: Request) -> str:
+        filename = hashlib.md5(str(request.url).encode("utf-8")).hexdigest()
+        filepath = os.path.join(self.cache_location, f"{filename}.json")
+        return filepath
+
+    def retrieve_cached_response(self, filepath):
+        with open(filepath, "r") as j:
+            data = json.load(j)
+
+            response = Response(
+                data["response"]["status_code"],
+                json=data["response"]["json"],
+            )
+
+            return response
+
+    def construct_cached_response(self, request: Request, response: Response):
+        request = request.__dict__
+        data = {
+            "url": str(request["url"]),
+            "headers": request.get("headers", {}).__dict__,
+            "response": {
+                "status_code": response.status_code,
+                "headers": response.headers.__dict__,
+            },
+        }
+        try:  # if json attached
+            data["response"]["json"] = response.json()
+        except JSONDecodeError:  # no json attached
+            pass
+
+        return data
+
+    @wraps(RateLimitedClient.send)
+    async def send(self, *args, **kwargs):
+        request: Request = args[0]
+
+        if self.caching:
+            filepath = self.get_filepath(request)
+
+            if os.path.exists(filepath):
+                return self.retrieve_cached_response(filepath)
+
+        response = await super().send(*args, **kwargs)
+
+        if self.caching:
+            cached_data = self.construct_cached_response(request, response)
+
+            with open(filepath, "w") as j:
+                json.dump(cached_data, j)
 
         return response

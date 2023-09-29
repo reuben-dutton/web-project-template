@@ -1,4 +1,5 @@
 import pytest
+import config
 from src.web.client import RateLimitedClient, ClientSettings
 
 
@@ -6,6 +7,14 @@ from src.web.client import RateLimitedClient, ClientSettings
 async def unlimited_client():
     clientSettings: ClientSettings = ClientSettings(None, None)
     client = RateLimitedClient(clientSettings)
+    yield client
+    await client.aclose()
+
+
+@pytest.fixture
+async def caching_client():
+    clientSettings: ClientSettings = ClientSettings(10, 2)
+    client = CachingClient(config.REQUEST_CACHE_LOCATION, clientSettings)
     yield client
     await client.aclose()
 
